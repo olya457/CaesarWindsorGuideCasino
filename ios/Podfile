@@ -30,5 +30,35 @@ target 'CaesarWindsorGuideCasino' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    installer.pods_project.targets.each do |target|
+      next unless target.name == 'fmt'
+
+      target.build_configurations.each do |build_config|
+        build_config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+        definitions = build_config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+        definitions = [definitions] unless definitions.is_a?(Array)
+        definitions << 'FMT_USE_CONSTEVAL=0' unless definitions.include?('FMT_USE_CONSTEVAL=0')
+        build_config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = definitions
+      end
+    end
+
+    fmt_base_headers = Dir.glob(File.join(installer.sandbox.root.to_s, '**', 'fmt', 'base.h')).map do |path|
+      File.realpath(path)
+    rescue StandardError
+      path
+    end.uniq
+
+    fmt_base_headers.each do |fmt_base_header|
+      next unless File.file?(fmt_base_header)
+
+      unless File.writable?(fmt_base_header)
+        File.chmod(File.stat(fmt_base_header).mode | 0200, fmt_base_header)
+      end
+
+      contents = File.read(fmt_base_header)
+      patched = contents.gsub('#  define FMT_USE_CONSTEVAL 1', '#  define FMT_USE_CONSTEVAL 0')
+      File.write(fmt_base_header, patched) if patched != contents
+    end
   end
 end

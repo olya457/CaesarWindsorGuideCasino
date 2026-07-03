@@ -1,0 +1,47 @@
+export const arrivalArt = {
+  loaderFacade: require('./arrival/obsidian_arrival_facade.jpg'),
+  guestPortal: require('./arrival/auric_guest_portal.png'),
+  laurelEmblem: require('./arrival/aureate_laurel_emblem.png'),
+  receptionPassage: require('./arrival/marble_reception_passage.png'),
+  diningChandelier: require('./arrival/skyline_dining_chandelier.png'),
+  eventHall: require('./arrival/velvet_event_hall.png'),
+  suiteRetreat: require('./arrival/moonlit_suite_retreat.png'),
+};
+
+export const culinaryArt = {
+  cedarMorningPlate: require('./culinary/cedar_morning_plate.png'),
+  briocheMapleLustre: require('./culinary/brioche_maple_lustre.png'),
+  hollandaisePeamealCrown: require('./culinary/hollandaise_peameal_crown.png'),
+  berryStackSnowfall: require('./culinary/berry_stack_snowfall.png'),
+  atlanticSilkBagel: require('./culinary/atlantic_silk_bagel.png'),
+  prairieSteakNocturne: require('./culinary/prairie_steak_nocturne.png'),
+  mapleSalmonHarbor: require('./culinary/maple_salmon_harbor.png'),
+  sageChickenSuite: require('./culinary/sage_chicken_suite.png'),
+  lobsterVelvetGratin: require('./culinary/lobster_velvet_gratin.png'),
+  primeBriocheStack: require('./culinary/prime_brioche_stack.png'),
+  mapleCheesecakeGlow: require('./culinary/maple_cheesecake_glow.png'),
+  caramelTartHeritage: require('./culinary/caramel_tart_heritage.png'),
+  nanaimoMidnightBar: require('./culinary/nanaimo_midnight_bar.png'),
+  orchardCrumbleWarmth: require('./culinary/orchard_crumble_warmth.png'),
+  moltenChocolateSalon: require('./culinary/molten_chocolate_salon.png'),
+  citrusSunriseGlass: require('./culinary/citrus_sunrise_glass.png'),
+  icedMapleCrema: require('./culinary/iced_maple_crema.png'),
+  berrySpritzCrystal: require('./culinary/berry_spritz_crystal.png'),
+  velvetCacaoCup: require('./culinary/velvet_cacao_cup.png'),
+  mineralSparkleBottle: require('./culinary/mineral_sparkle_bottle.png'),
+};
+
+export const occasionArt = {
+  rooftopAmberEvening: require('./occasions/rooftop_amber_evening.png'),
+  chefSignatureSalon: require('./occasions/chef_signature_salon.png'),
+  jazzBlueLounge: require('./occasions/jazz_blue_lounge.png'),
+  cellarVintageSelection: require('./occasions/cellar_vintage_selection.png'),
+  wellnessMorningStretch: require('./occasions/wellness_morning_stretch.png'),
+  poolsideRhythmAfternoon: require('./occasions/poolside_rhythm_afternoon.png'),
+  terraceGoldenCocktail: require('./occasions/terrace_golden_cocktail.png'),
+  gardenSeafoodGrill: require('./occasions/garden_seafood_grill.png'),
+  galleryDesignWalk: require('./occasions/gallery_design_walk.png'),
+  familyBrunchSalon: require('./occasions/family_brunch_salon.png'),
+  pianoGrandLobby: require('./occasions/piano_grand_lobby.png'),
+  terraceRomanceTable: require('./occasions/terrace_romance_table.png'),
+};
