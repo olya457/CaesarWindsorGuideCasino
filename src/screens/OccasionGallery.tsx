@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   EventCard,
   EventDetailView,
+  MenuBackButton,
   PremiumDarkBackground,
 } from '../components/grandSalonKit';
 import { occasionById, occasionItems } from '../data/occasionLedger';
@@ -13,9 +14,11 @@ import { palette, spacing } from '../theme/nocturneTokens';
 export function OccasionGallery({
   focusedEventId,
   onFocusConsumed,
+  onBack,
 }: {
   focusedEventId?: string | null;
   onFocusConsumed?: () => void;
+  onBack: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -46,6 +49,7 @@ export function OccasionGallery({
             },
           ]}
         >
+          <MenuBackButton onPress={onBack} />
           <EventDetailView
             event={selectedEvent}
             planned={planned.includes(selectedEvent.id)}
@@ -65,10 +69,11 @@ export function OccasionGallery({
           styles.scroll,
           {
             paddingTop: insets.top + 14 + spacing.androidTopGap,
-            paddingBottom: insets.bottom + 142 + spacing.navBottomGap + spacing.androidBottomGap,
+            paddingBottom: insets.bottom + 32 + spacing.androidBottomGap,
           },
         ]}
       >
+        <MenuBackButton onPress={onBack} />
         <View>
           <Text style={styles.kicker}>Curated Calendar</Text>
           <Text style={styles.title}>Daily Events</Text>
@@ -91,6 +96,7 @@ const styles = StyleSheet.create({
   },
   detailWrap: {
     flex: 1,
+    gap: 14,
   },
   kicker: {
     color: palette.softGold,

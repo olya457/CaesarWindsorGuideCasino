@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   CartSheet,
   ConfirmationModal,
+  MenuBackButton,
   MenuCategorySwitcher,
   MenuItemCard,
   PremiumDarkBackground,
@@ -13,7 +14,7 @@ import { menuCategories, menuItems } from '../data/menuPalace';
 import { useVaultState, vaultKeys } from '../storage/cellarVault';
 import { palette, radius, spacing } from '../theme/nocturneTokens';
 
-export function CulinaryConsole() {
+export function CulinaryConsole({ onBack }: { onBack: () => void }) {
   const insets = useSafeAreaInsets();
   const [selectedCategory, setSelectedCategory] = useVaultState<MenuCategory>(vaultKeys.menuCategory, 'Breakfast');
   const [cart, setCart] = useVaultState<CartEntry[]>(vaultKeys.cart, []);
@@ -79,10 +80,11 @@ export function CulinaryConsole() {
           styles.scroll,
           {
             paddingTop: insets.top + 14 + spacing.androidTopGap,
-            paddingBottom: insets.bottom + 142 + spacing.navBottomGap + spacing.androidBottomGap,
+            paddingBottom: insets.bottom + 32 + spacing.androidBottomGap,
           },
         ]}
       >
+        <MenuBackButton onPress={onBack} />
         <View style={styles.header}>
           <View style={styles.headerText}>
             <Text style={styles.kicker}>Signature Restaurant</Text>

@@ -14,6 +14,7 @@ import {
   ConfirmationModal,
   DailyDishCard,
   EventOfTheDayCard,
+  MenuBackButton,
   PremiumDarkBackground,
   PremiumGlowCard,
   QuickActionButton,
@@ -27,7 +28,13 @@ import { useVaultState, vaultKeys } from '../storage/cellarVault';
 import { palette, radius, spacing } from '../theme/nocturneTokens';
 import { stableIndex, todaySignature } from '../utils/daySignature';
 
-export function HarborDesk({ onViewEvent }: { onViewEvent: (eventId: string) => void }) {
+export function HarborDesk({
+  onViewEvent,
+  onBack,
+}: {
+  onViewEvent: (eventId: string) => void;
+  onBack: () => void;
+}) {
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const compact = height < 760;
@@ -74,10 +81,11 @@ export function HarborDesk({ onViewEvent }: { onViewEvent: (eventId: string) => 
           styles.scroll,
           {
             paddingTop: insets.top + 14 + spacing.androidTopGap,
-            paddingBottom: insets.bottom + 142 + spacing.navBottomGap + spacing.androidBottomGap,
+            paddingBottom: insets.bottom + 32 + spacing.androidBottomGap,
           },
         ]}
       >
+        <MenuBackButton onPress={onBack} />
         <ImageBackground
           source={arrivalArt.guestPortal}
           style={[styles.hero, compact && styles.heroCompact]}

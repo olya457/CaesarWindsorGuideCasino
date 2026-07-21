@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { arrivalArt } from '../assets/grandImageRegistry';
 import { CartEntry, MenuCategory, MenuItem, OccasionItem, TabKey, TaxiClass } from '../data/hospitalityTypes';
 import { menuItemById } from '../data/menuPalace';
+import { useVaultState, vaultKeys } from '../storage/cellarVault';
 import { palette, radius, shadow, spacing } from '../theme/nocturneTokens';
 
 type ButtonProps = {
@@ -112,6 +113,23 @@ export function SectionHeader({ title, action }: { title: string; action?: strin
   );
 }
 
+export function MenuBackButton({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Back to guest menu"
+      onPress={onPress}
+      style={({ pressed }) => [styles.menuBack, pressed && styles.pressed]}
+    >
+      <Text style={styles.menuBackArrow}>←</Text>
+      <View>
+        <Text style={styles.menuBackLabel}>GUEST DIRECTORY</Text>
+        <Text style={styles.menuBackTitle}>Back to menu</Text>
+      </View>
+    </Pressable>
+  );
+}
+
 export function BottomTabBar({
   active,
   onChange,
@@ -145,24 +163,175 @@ export function BottomTabBar({
 }
 
 export function ReservationCard() {
-  const rows = [
-    ['Booking Code', 'CWG-4827'],
-    ['Room Number', '1808'],
-    ['Check-in Date', 'Jul 3, 2026'],
-    ['Check-out Date', 'Jul 8, 2026'],
-  ];
+  const dateOptions = Array.from({ length: 21 }, (_, index) => {
+    const date = new Date();
+    date.setHours(12, 0, 0, 0);
+    date.setDate(date.getDate() + index);
+    return {
+      value: date.toISOString().slice(0, 10),
+      label: date.toLocaleDateString('en-CA', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    };
+  });
+  const roomOptions = ['1204', '1412', '1608', '1808', '2015', '2210', '2406'];
+  const guestOptions = ['1 guest', '2 guests', '3 guests', '4 guests'];
+  const defaultCheckIn = dateOptions[0].value;
+  const defaultCheckOut = dateOptions[1].value;
+  const [room, setRoom] = useVaultState(vaultKeys.reservationRoom, '1808');
+  const [checkIn, setCheckIn] = useVaultState(vaultKeys.reservationCheckIn, defaultCheckIn);
+  const [checkOut, setCheckOut] = useVaultState(vaultKeys.reservationCheckOut, defaultCheckOut);
+  const [guests, setGuests] = useVaultState(vaultKeys.reservationGuests, '2 guests');
+  const [confirmed, setConfirmed] = useVaultState(vaultKeys.reservationConfirmed, false);
+  const [openField, setOpenField] = useState<'room' | 'checkIn' | 'checkOut' | 'guests' | null>(null);
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
+
+  const labelForDate = (value: string) =>
+    dateOptions.find(option => option.value === value)?.label ?? value;
+
+  const chooseCheckIn = (value: string) => {
+    setCheckIn(value);
+    if (checkOut <= value) {
+      const nextDate = dateOptions.find(option => option.value > value);
+      setCheckOut(nextDate?.value ?? value);
+    }
+    setConfirmed(false);
+    setOpenField(null);
+  };
+
+  const chooseCheckOut = (value: string) => {
+    setCheckOut(value);
+    setConfirmed(false);
+    setOpenField(null);
+  };
+
+  const saveReservation = () => {
+    setConfirmed(true);
+    setConfirmationVisible(true);
+  };
+
+  const bookingCode = `CWG-${room}-${checkIn.slice(5).replace('-', '')}`;
+
   return (
-    <PremiumGlowCard>
-      <SectionHeader title="Reservation" action="Active" />
-      <View style={styles.reservationGrid}>
-        {rows.map(([label, value]) => (
-          <View key={label} style={styles.reservationCell}>
-            <Text style={styles.metaLabel}>{label}</Text>
-            <Text style={styles.metaValue}>{value}</Text>
+    <>
+      <PremiumGlowCard>
+        <SectionHeader title="Your Reservation" action={confirmed ? 'Confirmed' : 'Select your stay'} />
+        <Text style={styles.reservationIntro}>
+          Choose an available room and stay dates. Your selection is saved on this device.
+        </Text>
+
+        <ReservationSelect
+          label="Room number"
+          value={`Room ${room}`}
+          options={roomOptions.map(value => ({ value, label: `Room ${value}` }))}
+          open={openField === 'room'}
+          onToggle={() => setOpenField(current => (current === 'room' ? null : 'room'))}
+          onSelect={value => {
+            setRoom(value);
+            setConfirmed(false);
+            setOpenField(null);
+          }}
+        />
+        <View style={styles.reservationDateRow}>
+          <ReservationSelect
+            label="Check-in"
+            value={labelForDate(checkIn)}
+            options={dateOptions}
+            open={openField === 'checkIn'}
+            onToggle={() => setOpenField(current => (current === 'checkIn' ? null : 'checkIn'))}
+            onSelect={chooseCheckIn}
+            style={styles.reservationHalf}
+          />
+          <ReservationSelect
+            label="Check-out"
+            value={labelForDate(checkOut)}
+            options={dateOptions.filter(option => option.value > checkIn)}
+            open={openField === 'checkOut'}
+            onToggle={() => setOpenField(current => (current === 'checkOut' ? null : 'checkOut'))}
+            onSelect={chooseCheckOut}
+            style={styles.reservationHalf}
+          />
+        </View>
+        <ReservationSelect
+          label="Guests"
+          value={guests}
+          options={guestOptions.map(value => ({ value, label: value }))}
+          open={openField === 'guests'}
+          onToggle={() => setOpenField(current => (current === 'guests' ? null : 'guests'))}
+          onSelect={value => {
+            setGuests(value);
+            setConfirmed(false);
+            setOpenField(null);
+          }}
+        />
+
+        {confirmed ? (
+          <View style={styles.bookingCodeRow}>
+            <Text style={styles.bookingCodeLabel}>BOOKING CODE</Text>
+            <Text style={styles.bookingCodeValue}>{bookingCode}</Text>
           </View>
-        ))}
-      </View>
-    </PremiumGlowCard>
+        ) : null}
+        <PrimaryGoldButton
+          title={confirmed ? 'Update Reservation' : 'Confirm Reservation'}
+          onPress={saveReservation}
+          style={styles.reservationButton}
+        />
+      </PremiumGlowCard>
+      <ConfirmationModal
+        visible={confirmationVisible}
+        title="Reservation Confirmed"
+        message={`Room ${room} is selected from ${labelForDate(checkIn)} to ${labelForDate(checkOut)} for ${guests}.`}
+        onClose={() => setConfirmationVisible(false)}
+      />
+    </>
+  );
+}
+
+function ReservationSelect({
+  label,
+  value,
+  options,
+  open,
+  onToggle,
+  onSelect,
+  style,
+}: {
+  label: string;
+  value: string;
+  options: { value: string; label: string }[];
+  open: boolean;
+  onToggle: () => void;
+  onSelect: (value: string) => void;
+  style?: StyleProp<ViewStyle>;
+}) {
+  return (
+    <View style={[styles.reservationField, style]}>
+      <Text style={styles.metaLabel}>{label}</Text>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Select ${label}`}
+        onPress={onToggle}
+        style={[styles.reservationSelect, open && styles.reservationSelectOpen]}
+      >
+        <Text style={styles.reservationSelectValue} numberOfLines={1}>{value}</Text>
+        <Text style={styles.reservationChevron}>{open ? '↑' : '↓'}</Text>
+      </Pressable>
+      {open ? (
+        <ScrollView nestedScrollEnabled style={styles.reservationDropdown}>
+          {options.map(option => (
+            <Pressable
+              key={option.value}
+              onPress={() => onSelect(option.value)}
+              style={[styles.reservationOption, option.label === value && styles.reservationOptionActive]}
+            >
+              <Text style={styles.reservationOptionText}>{option.label}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      ) : null}
+    </View>
   );
 }
 
@@ -741,6 +910,35 @@ export const appShell = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
+  menuBack: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 11,
+    minHeight: 46,
+    paddingHorizontal: 13,
+    borderRadius: 23,
+    backgroundColor: 'rgba(255,255,255,0.055)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,229,163,0.16)',
+  },
+  menuBackArrow: {
+    color: palette.champagneGold,
+    fontSize: 22,
+    lineHeight: 24,
+  },
+  menuBackLabel: {
+    color: palette.primaryGold,
+    fontSize: 8,
+    letterSpacing: 1.2,
+    fontWeight: '900',
+  },
+  menuBackTitle: {
+    marginTop: 1,
+    color: palette.textPrimary,
+    fontSize: 12,
+    fontWeight: '800',
+  },
   background: {
     flex: 1,
     backgroundColor: palette.graphite,
@@ -887,18 +1085,39 @@ const styles = StyleSheet.create({
   tabLabelActive: {
     color: palette.softGold,
   },
-  reservationGrid: {
+  reservationIntro: {
+    marginTop: -5,
+    marginBottom: 16,
+    color: palette.textSecondary,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  reservationDateRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 12,
   },
-  reservationCell: {
-    width: '47%',
+  reservationHalf: {
+    flex: 1,
+    minWidth: 0,
+  },
+  reservationField: {
+    marginBottom: 13,
+  },
+  reservationSelect: {
+    minHeight: 52,
     borderRadius: radius.md,
-    padding: 12,
+    paddingHorizontal: 13,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
     backgroundColor: 'rgba(11,20,38,0.72)',
     borderWidth: 1,
     borderColor: palette.divider,
+  },
+  reservationSelectOpen: {
+    borderColor: palette.primaryGold,
+    backgroundColor: 'rgba(217,164,65,0.1)',
   },
   metaLabel: {
     color: palette.mutedText,
@@ -906,10 +1125,64 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 6,
   },
-  metaValue: {
+  reservationSelectValue: {
+    flex: 1,
     color: palette.textPrimary,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '900',
+  },
+  reservationChevron: {
+    color: palette.softGold,
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  reservationDropdown: {
+    maxHeight: 166,
+    marginTop: 7,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: palette.divider,
+    backgroundColor: palette.deepGraphite,
+  },
+  reservationOption: {
+    minHeight: 42,
+    justifyContent: 'center',
+    paddingHorizontal: 13,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(43,52,72,0.62)',
+  },
+  reservationOptionActive: {
+    backgroundColor: 'rgba(217,164,65,0.16)',
+  },
+  reservationOptionText: {
+    color: palette.textSecondary,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  bookingCodeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+    padding: 13,
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(52,199,123,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(52,199,123,0.28)',
+  },
+  bookingCodeLabel: {
+    color: palette.success,
+    fontSize: 9,
+    letterSpacing: 1.2,
+    fontWeight: '900',
+  },
+  bookingCodeValue: {
+    color: palette.textPrimary,
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  reservationButton: {
+    marginTop: 2,
   },
   quickAction: {
     flex: 1,

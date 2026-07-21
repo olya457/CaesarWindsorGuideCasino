@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { BottomTabBar } from '../components/grandSalonKit';
 import { TabKey } from '../data/hospitalityTypes';
 import { useVaultState, vaultKeys } from '../storage/cellarVault';
 import { AureliaGate } from '../screens/AureliaGate';
 import { CulinaryConsole } from '../screens/CulinaryConsole';
+import { ConciergeMenu } from '../screens/ConciergeMenu';
 import { HarborDesk } from '../screens/HarborDesk';
 import { OccasionGallery } from '../screens/OccasionGallery';
 import { SuiteAtmosphere } from '../screens/SuiteAtmosphere';
@@ -41,7 +41,7 @@ export function VelvetRouteDeck() {
 }
 
 function GrandTabCabinet() {
-  const [activeTab, setActiveTab] = useState<TabKey>('Home');
+  const [activeTab, setActiveTab] = useState<TabKey | 'Directory'>('Directory');
   const [focusedEventId, setFocusedEventId] = useState<string | null>(null);
 
   const openEvent = (eventId: string) => {
@@ -51,17 +51,20 @@ function GrandTabCabinet() {
 
   return (
     <View style={styles.root}>
-      {activeTab === 'Home' ? <HarborDesk onViewEvent={openEvent} /> : null}
-      {activeTab === 'Menu' ? <CulinaryConsole /> : null}
+      {activeTab === 'Directory' ? <ConciergeMenu onOpen={setActiveTab} /> : null}
+      {activeTab === 'Home' ? (
+        <HarborDesk onViewEvent={openEvent} onBack={() => setActiveTab('Directory')} />
+      ) : null}
+      {activeTab === 'Menu' ? <CulinaryConsole onBack={() => setActiveTab('Directory')} /> : null}
       {activeTab === 'Events' ? (
         <OccasionGallery
           focusedEventId={focusedEventId}
           onFocusConsumed={() => setFocusedEventId(null)}
+          onBack={() => setActiveTab('Directory')}
         />
       ) : null}
-      {activeTab === 'Room' ? <SuiteAtmosphere /> : null}
-      {activeTab === 'Taxi' ? <TransferConcierge /> : null}
-      <BottomTabBar active={activeTab} onChange={setActiveTab} />
+      {activeTab === 'Room' ? <SuiteAtmosphere onBack={() => setActiveTab('Directory')} /> : null}
+      {activeTab === 'Taxi' ? <TransferConcierge onBack={() => setActiveTab('Directory')} /> : null}
     </View>
   );
 }

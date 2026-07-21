@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ConfirmationModal,
+  MenuBackButton,
   PremiumDarkBackground,
   PremiumGlowCard,
   PrimaryGoldButton,
@@ -15,7 +16,7 @@ import { useVaultState, vaultKeys } from '../storage/cellarVault';
 import { palette, spacing } from '../theme/nocturneTokens';
 import { nextScheduleText } from '../utils/daySignature';
 
-export function TransferConcierge() {
+export function TransferConcierge({ onBack }: { onBack: () => void }) {
   const insets = useSafeAreaInsets();
   const [selectedTaxi, setSelectedTaxi] = useVaultState(vaultKeys.taxiCategory, taxiFleet[0].id);
   const [mode, setMode] = useVaultState<'ASAP' | 'Schedule'>(vaultKeys.taxiMode, 'ASAP');
@@ -31,10 +32,11 @@ export function TransferConcierge() {
           styles.scroll,
           {
             paddingTop: insets.top + 14 + spacing.androidTopGap,
-            paddingBottom: insets.bottom + 142 + spacing.navBottomGap + spacing.androidBottomGap,
+            paddingBottom: insets.bottom + 32 + spacing.androidBottomGap,
           },
         ]}
       >
+        <MenuBackButton onPress={onBack} />
         <View>
           <Text style={styles.kicker}>Transfer Desk</Text>
           <Text style={styles.title}>Taxi Booking</Text>

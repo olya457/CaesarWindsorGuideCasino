@@ -8,6 +8,7 @@ import {
   FanSpeedSelector,
   LightingBrightnessControl,
   LightingModeSelector,
+  MenuBackButton,
   PremiumDarkBackground,
   PremiumGlowCard,
   PrimaryGoldButton,
@@ -18,7 +19,7 @@ import {
 import { useVaultState, vaultKeys } from '../storage/cellarVault';
 import { palette, spacing } from '../theme/nocturneTokens';
 
-export function SuiteAtmosphere() {
+export function SuiteAtmosphere({ onBack }: { onBack: () => void }) {
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useVaultState<'Climate' | 'Lighting'>(vaultKeys.chamberTab, 'Climate');
   const [desiredTemp, setDesiredTemp] = useVaultState(vaultKeys.climateTemp, 22);
@@ -41,10 +42,11 @@ export function SuiteAtmosphere() {
           styles.scroll,
           {
             paddingTop: insets.top + 14 + spacing.androidTopGap,
-            paddingBottom: insets.bottom + 142 + spacing.navBottomGap + spacing.androidBottomGap,
+            paddingBottom: insets.bottom + 32 + spacing.androidBottomGap,
           },
         ]}
       >
+        <MenuBackButton onPress={onBack} />
         <View>
           <Text style={styles.kicker}>Suite Atmosphere</Text>
           <Text style={styles.title}>Room Controls</Text>

@@ -19,8 +19,6 @@ export function AureliaGate({ onFinish }: { onFinish: () => void }) {
   return (
     <ImageBackground source={arrivalArt.loaderFacade} style={styles.root} resizeMode="cover">
       <View style={styles.deepShade} />
-      <View style={styles.goldHalo} />
-      <View style={styles.blueHalo} />
       <View style={styles.center}>
         <View style={styles.logoCard}>
           <Image source={arrivalArt.laurelEmblem} style={styles.logo} resizeMode="contain" />
@@ -45,24 +43,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     backgroundColor: 'rgba(7,20,38,0.54)',
-  },
-  goldHalo: {
-    position: 'absolute',
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    top: 132,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(217,164,65,0.18)',
-  },
-  blueHalo: {
-    position: 'absolute',
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    bottom: -80,
-    right: -120,
-    backgroundColor: 'rgba(18,59,115,0.32)',
   },
   center: {
     flex: 1,
